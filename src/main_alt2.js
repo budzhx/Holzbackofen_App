@@ -1095,18 +1095,6 @@ function istAdmin() {
   return aktuellesProfil?.rolle === 'admin'
 }
 
-function darfBacktagVerwalten(backtag) {
-  if (!backtag || !aktuellerBenutzer) {
-    return false
-  }
-
-  return (
-    istAdmin() ||
-    String(backtag.erstellt_von) ===
-      String(aktuellerBenutzer.id)
-  )
-}
-
 /*
  * =========================================================
  * ANGEMELDETE OBERFLÄCHE
@@ -1155,7 +1143,11 @@ function baueAngemeldeteOberflaeche() {
     <main class="container">
       <p id="globale-meldung" role="status"></p>
 
-      ${erstelleBacktagFormular()}
+      ${
+        istAdmin()
+          ? erstelleAdminFormular()
+          : ''
+      }
 
       <section class="bereich">
         <div class="listen-kopf">
@@ -1239,16 +1231,18 @@ function baueAngemeldeteOberflaeche() {
       zeigeMitgliedMonatsansicht
     )
 
-  registriereBacktagFormular()
+  if (istAdmin()) {
+    registriereAdminFormular()
+  }
 }
 
 /*
  * =========================================================
- * BACKTAG ANLEGEN UND BEARBEITEN
+ * ADMIN: BACKTAG ANLEGEN UND BEARBEITEN
  * =========================================================
  */
 
-function erstelleBacktagFormular() {
+function erstelleAdminFormular() {
   return `
     <section class="bereich">
       <h2 id="backtag-formular-titel">
@@ -1321,7 +1315,7 @@ function erstelleBacktagFormular() {
   `
 }
 
-function registriereBacktagFormular() {
+function registriereAdminFormular() {
   document
     .querySelector('#backtag-formular')
     ?.addEventListener('submit', speichereBacktag)
@@ -1435,23 +1429,15 @@ async function speichereBacktag(ereignis) {
 }
 
 function bearbeiteBacktag(id) {
+  if (!istAdmin()) {
+    return
+  }
+
   const backtag = alleBacktage.find(
     (eintrag) => String(eintrag.id) === String(id)
   )
 
   if (!backtag) {
-    zeigeMeldung(
-      'Der Backtag wurde nicht gefunden.',
-      'fehler'
-    )
-    return
-  }
-
-  if (!darfBacktagVerwalten(backtag)) {
-    zeigeMeldung(
-      'Du darfst diesen Backtag nicht bearbeiten.',
-      'fehler'
-    )
     return
   }
 
@@ -1517,23 +1503,15 @@ function setzeBacktagFormularZurueck() {
 }
 
 async function loescheBacktag(id) {
+  if (!istAdmin()) {
+    return
+  }
+
   const backtag = alleBacktage.find(
     (eintrag) => String(eintrag.id) === String(id)
   )
 
   if (!backtag) {
-    zeigeMeldung(
-      'Der Backtag wurde nicht gefunden.',
-      'fehler'
-    )
-    return
-  }
-
-  if (!darfBacktagVerwalten(backtag)) {
-    zeigeMeldung(
-      'Du darfst diesen Backtag nicht löschen.',
-      'fehler'
-    )
     return
   }
 
@@ -1558,6 +1536,7 @@ async function loescheBacktag(id) {
       `Fehler beim Löschen: ${error.message}`,
       'fehler'
     )
+
     return
   }
 
@@ -1566,7 +1545,6 @@ async function loescheBacktag(id) {
     'erfolg'
   )
 
-  setzeBacktagFormularZurueck()
   await ladeAngemeldeteBacktage()
 }
 
@@ -1875,7 +1853,7 @@ function erstelleTageskarteHtml(
       </div>
 
       ${
-        angemeldet && darfBacktagVerwalten(backtag)
+        angemeldet && istAdmin()
           ? `
             <div class="kopf-aktionen">
               <button
@@ -2560,35 +2538,4 @@ function maskiereHtml(wert) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;')
-}
-
-/*
- * =========================================================
- * PWA / SERVICE WORKER
- * =========================================================
- */
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const serviceWorkerUrl =
-        `${import.meta.env.BASE_URL}service-worker.js`
-
-      await navigator.serviceWorker.register(
-        serviceWorkerUrl,
-        {
-          scope: import.meta.env.BASE_URL
-        }
-      )
-
-      console.log(
-        'Service Worker wurde erfolgreich registriert.'
-      )
-    } catch (error) {
-      console.error(
-        'Service Worker konnte nicht registriert werden:',
-        error
-      )
-    }
-  })
 }
