@@ -725,3 +725,39 @@ button:disabled {
     font-size: 1.25rem;
   }
 }
+
+.auth-register {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 5px;
+  border-radius: 12px;
+  background: #f1ebe5;
+}
+
+.auth-register-button {
+  width: 100%;
+}
+
+.auth-register-button.aktiv {
+  background: #7a3e20;
+  color: white;
+}
+
+.zurueck-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.login-karte small {
+  margin-top: 6px;
+  color: #75675e;
+  line-height: 1.4;
+}
+
+@media (max-width: 420px) {
+  .auth-register {
+    grid-template-columns: 1fr;
+  }
+}

@@ -519,6 +519,8 @@ function zeigeOeffentlicheBacktage(backtage) {
  * =========================================================
  */
 
+
+
 function zeigeLogin(fehlertext = '') {
   app.innerHTML = `
     <main class="login-seite">
@@ -526,12 +528,30 @@ function zeigeLogin(fehlertext = '') {
         <div class="login-symbol">🔥</div>
 
         <p class="untertitel">Holzbackofenverein</p>
-        <h1>Mitglieder-Login</h1>
+        <h1 id="auth-titel">Mitglieder-Login</h1>
 
-        <p class="login-text">
+        <p id="auth-beschreibung" class="login-text">
           Melde dich an, um deine Brote, Pizzen und
           Fleischplanung einzutragen.
         </p>
+
+        <div class="auth-register">
+          <button
+            id="login-ansicht-button"
+            type="button"
+            class="auth-register-button aktiv"
+          >
+            Anmelden
+          </button>
+
+          <button
+            id="registrierung-ansicht-button"
+            type="button"
+            class="auth-register-button sekundaer"
+          >
+            Registrieren
+          </button>
+        </div>
 
         <form id="login-formular">
           <div class="formular-feld">
@@ -557,6 +577,7 @@ function zeigeLogin(fehlertext = '') {
               id="login-passwort"
               type="password"
               autocomplete="current-password"
+              minlength="8"
               required
             >
           </div>
@@ -564,23 +585,96 @@ function zeigeLogin(fehlertext = '') {
           <button id="login-button" type="submit">
             Anmelden
           </button>
+        </form>
+
+        <form
+          id="registrierungs-formular"
+          class="versteckt"
+        >
+          <div class="formular-feld">
+            <label for="registrierung-name">
+              Name
+            </label>
+
+            <input
+              id="registrierung-name"
+              type="text"
+              autocomplete="name"
+              maxlength="100"
+              placeholder="Vor- und Nachname"
+              required
+            >
+          </div>
+
+          <div class="formular-feld">
+            <label for="registrierung-email">
+              E-Mail-Adresse
+            </label>
+
+            <input
+              id="registrierung-email"
+              type="email"
+              autocomplete="email"
+              placeholder="name@beispiel.de"
+              required
+            >
+          </div>
+
+          <div class="formular-feld">
+            <label for="registrierung-passwort">
+              Passwort
+            </label>
+
+            <input
+              id="registrierung-passwort"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            >
+
+            <small>
+              Das Passwort muss mindestens 8 Zeichen haben.
+            </small>
+          </div>
+
+          <div class="formular-feld">
+            <label for="registrierung-passwort-wiederholen">
+              Passwort wiederholen
+            </label>
+
+            <input
+              id="registrierung-passwort-wiederholen"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            >
+          </div>
 
           <button
-            id="zurueck-zur-uebersicht"
-            type="button"
-            class="sekundaer"
+            id="registrierung-button"
+            type="submit"
           >
-            Ohne Anmeldung zur Übersicht
+            Konto erstellen
           </button>
-
-          <p
-            id="login-meldung"
-            class="${fehlertext ? 'fehler' : ''}"
-            role="status"
-          >
-            ${maskiereHtml(fehlertext)}
-          </p>
         </form>
+
+        <button
+          id="zurueck-zur-uebersicht"
+          type="button"
+          class="sekundaer zurueck-button"
+        >
+          Ohne Anmeldung zur Übersicht
+        </button>
+
+        <p
+          id="login-meldung"
+          class="${fehlertext ? 'fehler' : ''}"
+          role="status"
+        >
+          ${maskiereHtml(fehlertext)}
+        </p>
       </section>
     </main>
   `
@@ -590,8 +684,111 @@ function zeigeLogin(fehlertext = '') {
     .addEventListener('submit', anmelden)
 
   document
+    .querySelector('#registrierungs-formular')
+    .addEventListener('submit', registrieren)
+
+  document
+    .querySelector('#login-ansicht-button')
+    .addEventListener('click', zeigeLoginFormular)
+
+  document
+    .querySelector('#registrierung-ansicht-button')
+    .addEventListener(
+      'click',
+      zeigeRegistrierungsFormular
+    )
+
+  document
     .querySelector('#zurueck-zur-uebersicht')
     .addEventListener('click', starteGastAnsicht)
+}
+
+function zeigeLoginFormular() {
+  const loginFormular =
+    document.querySelector('#login-formular')
+
+  const registrierungsFormular =
+    document.querySelector('#registrierungs-formular')
+
+  loginFormular.classList.remove('versteckt')
+  registrierungsFormular.classList.add('versteckt')
+
+  document.querySelector(
+    '#auth-titel'
+  ).textContent = 'Mitglieder-Login'
+
+  document.querySelector(
+    '#auth-beschreibung'
+  ).textContent =
+    'Melde dich an, um deine Brote, Pizzen und Fleischplanung einzutragen.'
+
+  document
+    .querySelector('#login-ansicht-button')
+    .classList.add('aktiv')
+
+  document
+    .querySelector('#login-ansicht-button')
+    .classList.remove('sekundaer')
+
+  document
+    .querySelector('#registrierung-ansicht-button')
+    .classList.remove('aktiv')
+
+  document
+    .querySelector('#registrierung-ansicht-button')
+    .classList.add('sekundaer')
+
+  leereAuthMeldung()
+}
+
+function zeigeRegistrierungsFormular() {
+  const loginFormular =
+    document.querySelector('#login-formular')
+
+  const registrierungsFormular =
+    document.querySelector('#registrierungs-formular')
+
+  loginFormular.classList.add('versteckt')
+  registrierungsFormular.classList.remove('versteckt')
+
+  document.querySelector(
+    '#auth-titel'
+  ).textContent = 'Mitglied registrieren'
+
+  document.querySelector(
+    '#auth-beschreibung'
+  ).textContent =
+    'Erstelle ein Konto mit deinem Namen, deiner E-Mail-Adresse und einem Passwort.'
+
+  document
+    .querySelector('#registrierung-ansicht-button')
+    .classList.add('aktiv')
+
+  document
+    .querySelector('#registrierung-ansicht-button')
+    .classList.remove('sekundaer')
+
+  document
+    .querySelector('#login-ansicht-button')
+    .classList.remove('aktiv')
+
+  document
+    .querySelector('#login-ansicht-button')
+    .classList.add('sekundaer')
+
+  leereAuthMeldung()
+}
+
+function leereAuthMeldung() {
+  const meldung =
+    document.querySelector('#login-meldung')
+
+  if (!meldung) {
+    return
+  }
+
+  meldung.textContent = ''
+  meldung.className = ''
 }
 
 async function anmelden(ereignis) {
@@ -641,6 +838,131 @@ async function anmelden(ereignis) {
     loginMeldung.className = 'fehler'
   }
 }
+
+async function registrieren(ereignis) {
+  ereignis.preventDefault()
+
+  const name =
+    document
+      .querySelector('#registrierung-name')
+      .value
+      .trim()
+
+  const email =
+    document
+      .querySelector('#registrierung-email')
+      .value
+      .trim()
+
+  const passwort =
+    document
+      .querySelector('#registrierung-passwort')
+      .value
+
+  const passwortWiederholung =
+    document
+      .querySelector(
+        '#registrierung-passwort-wiederholen'
+      )
+      .value
+
+  const button =
+    document.querySelector('#registrierung-button')
+
+  const meldung =
+    document.querySelector('#login-meldung')
+
+  meldung.textContent = ''
+  meldung.className = ''
+
+  if (!name) {
+    meldung.textContent =
+      'Bitte gib deinen Namen ein.'
+
+    meldung.className = 'fehler'
+    return
+  }
+
+  if (!email) {
+    meldung.textContent =
+      'Bitte gib deine E-Mail-Adresse ein.'
+
+    meldung.className = 'fehler'
+    return
+  }
+
+  if (passwort.length < 8) {
+    meldung.textContent =
+      'Das Passwort muss mindestens 8 Zeichen haben.'
+
+    meldung.className = 'fehler'
+    return
+  }
+
+  if (passwort !== passwortWiederholung) {
+    meldung.textContent =
+      'Die beiden Passwörter stimmen nicht überein.'
+
+    meldung.className = 'fehler'
+    return
+  }
+
+  button.disabled = true
+  button.textContent = 'Konto wird erstellt …'
+
+  const redirectUrl =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:5173/'
+      : 'https://budzhx.github.io/Holzbackofen_App/'
+
+  const { data, error } =
+    await supabase.auth.signUp({
+      email,
+      password: passwort,
+
+      options: {
+        data: {
+          name
+        },
+
+        emailRedirectTo: redirectUrl
+      }
+    })
+
+  button.disabled = false
+  button.textContent = 'Konto erstellen'
+
+  if (error) {
+    console.error(
+      'Fehler bei der Registrierung:',
+      error
+    )
+
+    meldung.textContent =
+      `Registrierung fehlgeschlagen: ${error.message}`
+
+    meldung.className = 'fehler'
+    return
+  }
+
+  document
+    .querySelector('#registrierungs-formular')
+    .reset()
+
+  if (data.session) {
+    meldung.textContent =
+      'Dein Konto wurde erstellt. Du wirst angemeldet.'
+
+    meldung.className = 'erfolg'
+    return
+  }
+
+  meldung.textContent =
+    'Dein Konto wurde erstellt. Bitte öffne jetzt die Bestätigungs-E-Mail und bestätige deine E-Mail-Adresse.'
+
+  meldung.className = 'erfolg'
+}
+
 
 async function abmelden() {
   const bestaetigt = window.confirm(
